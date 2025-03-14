@@ -10,6 +10,8 @@ type GameData = {
 }
 
 export default function Home() {
+     const [decision, setDecision] = useState<string | null>(null)
+     const [gameHistory, setGameHistory] = useState<Array<{ result: string; playerTotal: number; bankerTotal: number }>>([])
      const [playerHand, setPlayerHand] = useState<number[]>([])
      const [bankerHand, setBankerHand] = useState<number[]>([])
      const [playerCardTotal, setPlayerCardTotal] = useState(0)
@@ -41,6 +43,8 @@ export default function Home() {
                setPlayerHand(gameData.playerHand)
                setBankerHand(gameData.bankerHand)
                setResult(gameData.result)
+
+               setGameHistory((prevHistory) => [{ result: gameData.result, playerTotal, bankerTotal }, ...prevHistory.slice(0, 19)])
           }
 
           newSocket.on('gameUpdate', gameUpdateHandler)
@@ -122,6 +126,25 @@ export default function Home() {
                               Reveal Winner
                          </button> */}
                     </Card>
+
+                    {gameHistory.length > 0 && (
+                         <Card className="w-full p-6">
+                              <h2 className="text-xl font-semibold mb-4">Game History</h2>
+                              <div className="space-y-2 max-h-40 overflow-y-auto">
+                                   {gameHistory.map(
+                                        (game, index) =>
+                                             game.result && (
+                                                  <div key={index} className="p-2 rounded-md">
+                                                       <span>{game.result}</span>
+                                                       <span className="ml-2 font-semibold">
+                                                            Player {game.playerTotal} - Banker {game.bankerTotal}
+                                                       </span>
+                                                  </div>
+                                             )
+                                   )}
+                              </div>
+                         </Card>
+                    )}
                </main>
                <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center"></footer>
           </div>
