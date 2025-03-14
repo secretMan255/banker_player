@@ -61,13 +61,16 @@ export default function Home() {
      }
 
      function convertCard(card: number) {
-          const a = ['J', 'Q', 'K']
-
-          if (card >= 11) {
-               return a[Math.floor(Math.random() * a.length)]
+          switch (card) {
+               case 11:
+                    return 'J'
+               case 12:
+                    return 'Q'
+               case 13:
+                    return 'K'
+               default:
+                    return card
           }
-
-          return card
      }
 
      return (
