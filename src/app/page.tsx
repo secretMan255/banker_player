@@ -6,6 +6,8 @@ import { Card } from '@/components/ui/card'
 type GameData = {
      playerHand: number[]
      bankerHand: number[]
+     playerTotal: number
+     bankerTotal: number
      result: string
 }
 
@@ -26,25 +28,18 @@ export default function Home() {
           setSocket(newSocket)
 
           const gameUpdateHandler = (gameData: GameData) => {
-               let playerTotal: number = gameData.playerHand.reduce((sum, card) => sum + Math.min(card, 10), 0)
-               let bankerTotal: number = gameData.bankerHand.reduce((sum, card) => sum + Math.min(card, 10), 0)
-
-               if (playerTotal > 10) {
-                    playerTotal = playerTotal - 10
-               }
-
-               if (bankerTotal > 10) {
-                    bankerTotal = bankerTotal - 10
-               }
-
-               setPlayerCardTotal(playerTotal)
-               setBankerCardTotal(bankerTotal)
+               setPlayerCardTotal(gameData.playerTotal)
+               setBankerCardTotal(gameData.bankerTotal)
 
                setPlayerHand(gameData.playerHand)
                setBankerHand(gameData.bankerHand)
                setResult(gameData.result)
 
-               setGameHistory((prevHistory) => [{ result: gameData.result, playerTotal, bankerTotal }, ...prevHistory.slice(0, 19)])
+               if (gameData.result === decision) {
+                    // transfer or deduct
+               }
+
+               setGameHistory((prevHistory) => [{ result: gameData.result, playerTotal: gameData.playerTotal, bankerTotal: gameData.bankerTotal }, ...prevHistory.slice(0, 19)])
           }
 
           newSocket.on('gameUpdate', gameUpdateHandler)
@@ -121,8 +116,12 @@ export default function Home() {
                          </div>
 
                          <div className="flex ... gap-4">
-                              <button className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">PLAYER</button>
-                              <button className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">BANK</button>
+                              <button className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600" onClick={() => setDecision('Player Wins!')}>
+                                   PLAYER
+                              </button>
+                              <button className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600" onClick={() => setDecision('Banker Wins!')}>
+                                   BANK
+                              </button>
                          </div>
 
                          {/* <button className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600" onClick={playGame}>
@@ -137,7 +136,10 @@ export default function Home() {
                                    {gameHistory.map(
                                         (game, index) =>
                                              game.result && (
-                                                  <div key={index} className="p-2 rounded-md">
+                                                  <div
+                                                       key={index}
+                                                       className={`p-2 rounded-md ${game.result === 'Player Wins!' ? 'bg-green-100' : game.result === 'Banker Wins!' ? 'bg-red-100' : 'bg-orange-100'}`}
+                                                  >
                                                        <span>{game.result}</span>
                                                        <span className="ml-2 font-semibold">
                                                             Player {game.playerTotal} - Banker {game.bankerTotal}

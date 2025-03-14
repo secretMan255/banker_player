@@ -18,7 +18,7 @@ const generateGameRound = (io: Server) => {
 
      const gameResult = playerTotal > bankerTotal ? 'Player Wins!' : bankerTotal > playerTotal ? 'Banker Wins!' : "It's a Tie!"
 
-     const gameData = { playerHand: newPlayerHand, bankerHand: newBankerHand, result: gameResult }
+     const gameData = { playerHand: newPlayerHand, bankerHand: newBankerHand, result: gameResult, bankerTotal: bankerTotal, playerTotal: playerTotal }
 
      io.emit('gameUpdate', gameData) // Broadcast to all clients
 }
