@@ -9,6 +9,8 @@ type GameData = {
      playerTotal: number
      bankerTotal: number
      result: string
+     loadMapResult: ('Player Wins' | 'Banker Wins' | "It's a Tie!")[]
+     grid: string[][]
 }
 
 export default function Home() {
@@ -20,6 +22,11 @@ export default function Home() {
      const [bankerCardTotal, setBankerCardTotal] = useState(0)
      const [result, setResult] = useState<string | null>(null)
      const [socket, setSocket] = useState<Socket | null>(null)
+     const [grid, setGrid] = useState<Array<Array<string>>>(
+          Array(6)
+               .fill(null)
+               .map(() => Array(30).fill(''))
+     )
 
      useEffect(() => {
           if (typeof window === 'undefined') return // Prevent SSR issues
@@ -38,10 +45,13 @@ export default function Home() {
                if (gameData.result === decision) {
                     // transfer or deduct
                }
+               console.log('grid: ', gameData.grid)
+               if (gameData.grid) {
+                    setGrid(gameData.grid)
+               }
 
                setGameHistory((prevHistory) => [{ result: gameData.result, playerTotal: gameData.playerTotal, bankerTotal: gameData.bankerTotal }, ...prevHistory.slice(0, 19)])
           }
-
           newSocket.on('gameUpdate', gameUpdateHandler)
 
           return () => {
@@ -138,7 +148,7 @@ export default function Home() {
                                              game.result && (
                                                   <div
                                                        key={index}
-                                                       className={`p-2 rounded-md ${game.result === 'Player Wins!' ? 'bg-green-100' : game.result === 'Banker Wins!' ? 'bg-red-100' : 'bg-orange-100'}`}
+                                                       className={`p-2 rounded-md ${game.result === 'Player Wins' ? 'bg-green-100' : game.result === 'Banker Wins' ? 'bg-red-100' : 'bg-orange-100'}`}
                                                   >
                                                        <span>{game.result}</span>
                                                        <span className="ml-2 font-semibold">
@@ -150,6 +160,46 @@ export default function Home() {
                               </div>
                          </Card>
                     )}
+
+                    <Card className="w-full p-6">
+                         <h2 className="text-xl font-semibold mb-4">Road Map</h2>
+                         <div className="overflow-x-auto">
+                              <div className="bg-black p-2 min-w-[600px]">
+                                   <div className="grid grid-rows-6 gap-1" style={{ display: 'grid', gridTemplateRows: 'repeat(6, 1fr)', gridAutoFlow: 'column' }}>
+                                        {Array(6)
+                                             .fill(null)
+                                             .map((_, rowIndex) => (
+                                                  <div key={rowIndex} className="flex">
+                                                       {Array(30)
+                                                            .fill(null)
+                                                            .map((_, colIndex) => {
+                                                                 const cellValue = grid[rowIndex]?.[colIndex] || ''
+                                                                 return (
+                                                                      <div key={`${rowIndex}-${colIndex}`} className="w-6 h-6 flex items-center justify-center">
+                                                                           {cellValue === 'Player Wins' && (
+                                                                                <div className="w-5 h-5 rounded-full bg-blue-600 border-2 border-blue-800 flex items-center justify-center">
+                                                                                     <div className="w-1 h-1 rounded-full bg-blue-300"></div>
+                                                                                </div>
+                                                                           )}
+                                                                           {cellValue === 'Banker Wins' && (
+                                                                                <div className="w-5 h-5 rounded-full bg-red-600 border-2 border-red-800 flex items-center justify-center">
+                                                                                     <div className="w-1 h-1 rounded-full bg-red-300"></div>
+                                                                                </div>
+                                                                           )}
+                                                                           {cellValue === "It's a Tie!" && (
+                                                                                <div className="w-5 h-5 rounded-full bg-green-600 border-2 border-green-800 flex items-center justify-center">
+                                                                                     <div className="w-1 h-1 rounded-full bg-green-300"></div>
+                                                                                </div>
+                                                                           )}
+                                                                      </div>
+                                                                 )
+                                                            })}
+                                                  </div>
+                                             ))}
+                                   </div>
+                              </div>
+                         </div>
+                    </Card>
                </main>
                <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center"></footer>
           </div>
